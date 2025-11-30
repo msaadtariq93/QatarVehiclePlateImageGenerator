@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export default function PlateGenerator() {
-  const [plateNumber, setPlateNumber] = useState("123456");
+  const [plateNumber, setPlateNumber] = useState("974");
   const plateRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -16,10 +16,9 @@ export default function PlateGenerator() {
     if (plateRef.current) {
       setIsGenerating(true);
       try {
-        // Wait a bit for images/fonts to be fully ready if needed
         const dataUrl = await toPng(plateRef.current, { 
           cacheBust: true, 
-          pixelRatio: 3, // Higher resolution for download
+          pixelRatio: 3,
           backgroundColor: 'transparent'
         });
         download(dataUrl, `qatar-plate-${plateNumber}.png`);
@@ -32,151 +31,126 @@ export default function PlateGenerator() {
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Allow only numbers and limit to 6 digits
     const value = e.target.value.replace(/\D/g, "").slice(0, 6);
     setPlateNumber(value);
   };
 
   return (
-    <div className="min-h-screen w-full bg-stone-100 flex items-center justify-center p-4 font-sans">
-      <div className="w-full max-w-3xl space-y-8">
+    <div className="min-h-screen w-full bg-slate-100 flex items-center justify-center p-4 font-sans">
+      <div className="w-full max-w-4xl space-y-8">
         
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight text-stone-800">
+          <h1 className="text-4xl font-bold tracking-tight text-slate-800">
             Qatar Plate Generator
           </h1>
-          <p className="text-stone-500">
-            Enter a number to generate a realistic Qatar vehicle license plate.
+          <p className="text-slate-500">
+            Enter a number to generate a Qatar vehicle license plate.
           </p>
         </div>
 
-        <Card className="p-8 bg-white shadow-xl border-stone-200/60 rounded-2xl space-y-8">
+        <Card className="p-8 bg-white shadow-xl border-slate-200/60 rounded-2xl space-y-8">
           
           {/* Plate Preview Area */}
-          <div className="flex justify-center items-center py-12 bg-stone-50/50 rounded-xl border border-dashed border-stone-200 overflow-hidden relative">
+          <div className="flex justify-center items-center py-16 bg-slate-50 rounded-xl border border-dashed border-slate-200 overflow-hidden">
             
             {/* The Plate Component */}
             <div 
               ref={plateRef}
-              className="relative flex w-[600px] h-[130px] bg-white rounded-lg overflow-hidden shadow-2xl transform transition-transform hover:scale-[1.02] duration-300 border border-stone-300"
+              className="relative flex w-[700px] h-[150px] bg-white rounded-xl overflow-hidden shadow-2xl border-[6px] border-black items-stretch"
               style={{
-                boxShadow: "0 10px 30px -10px rgba(0,0,0,0.3), inset 0 0 0 2px rgba(0,0,0,0.05)"
+                boxShadow: "0 20px 40px -10px rgba(0,0,0,0.2)"
               }}
             >
-              {/* Texture Overlay (CSS Noise) */}
-              <div className="absolute inset-0 opacity-20 pointer-events-none z-20 mix-blend-multiply"
-                   style={{
-                     backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E")`
-                   }}>
-              </div>
               
-              {/* Light Sheen */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-black/5 pointer-events-none z-20 mix-blend-overlay opacity-50"></div>
-
-              {/* Left Maroon Section */}
-              <div className="w-[25%] h-full bg-[#8D1B3D] relative flex flex-col items-center justify-center z-10 overflow-hidden">
+              {/* Left Maroon Section with Serrated Edge */}
+              <div className="relative w-[140px] h-full bg-[#801634] z-10 flex flex-col items-center justify-center shrink-0">
                 
-                {/* Inner shadow for depth */}
-                <div className="absolute inset-0 shadow-[inset_-2px_0_5px_rgba(0,0,0,0.2)] pointer-events-none"></div>
+                {/* Serrated Pattern */}
+                <div className="absolute top-0 bottom-0 -right-[18px] w-[20px] h-full flex flex-col z-20">
+                   {/* Using SVG for perfect jagged edge */}
+                   <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 20 100">
+                     <defs>
+                       <pattern id="serration" x="0" y="0" width="20" height="12.5" patternUnits="userSpaceOnUse">
+                         <path d="M0,0 L20,6.25 L0,12.5 Z" fill="#801634" />
+                       </pattern>
+                     </defs>
+                     <rect x="0" y="0" width="20" height="100" fill="url(#serration)" />
+                   </svg>
+                </div>
 
-                {/* QATAR Text (English) - Rotated Style */}
-                <div className="relative flex items-center justify-center h-full w-full">
-                  <span className="text-white font-bold tracking-[0.2em] text-3xl -rotate-90 absolute whitespace-nowrap opacity-95 drop-shadow-sm" 
-                        style={{ fontFamily: "Oswald" }}>
-                    QATAR
+                {/* QATAR Vertical Text */}
+                <div className="flex flex-col items-center justify-center space-y-1 translate-x-[-4px]">
+                  {['Q', 'A', 'T', 'A', 'R'].map((char, i) => (
+                    <span key={i} className="text-white font-bold text-xl leading-none font-sans">
+                      {char}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Middle & Right Section */}
+              <div className="flex-1 flex items-center pl-8 pr-4 bg-white relative z-0">
+                
+                {/* Arabic Text "Qatar" */}
+                <div className="flex flex-col items-center justify-center mr-12 pt-2">
+                  <span className="text-black text-[80px] leading-none" 
+                        style={{ fontFamily: "'Noto Sans Arabic', sans-serif", fontWeight: 700 }}>
+                    قطر
                   </span>
                 </div>
-              </div>
 
-              {/* Right White Section (Number) */}
-              <div className="flex-1 h-full bg-white flex items-center justify-center relative z-10">
-                
-                {/* Subtle Watermark */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none select-none scale-150">
-                  <span className="text-6xl font-bold tracking-widest rotate-12">QATAR</span>
+                {/* Number */}
+                <div className="flex-1 flex justify-center items-center">
+                  <span 
+                    className="text-black font-bold tracking-tight leading-none"
+                    style={{ 
+                      fontSize: "110px",
+                      fontFamily: "Inter, sans-serif",
+                      letterSpacing: "-0.02em"
+                    }}
+                  >
+                    {plateNumber || "0000"}
+                  </span>
                 </div>
 
-                <span 
-                  className="text-[#1a1a1a] font-bold tracking-widest leading-none relative z-10"
-                  style={{ 
-                    fontSize: plateNumber.length > 5 ? "110px" : "120px",
-                    fontFamily: "Oswald", 
-                    textShadow: "1px 1px 1px rgba(0,0,0,0.1), -1px -1px 0px rgba(255,255,255,0.5)"
-                  }}
-                >
-                  {plateNumber || "000000"}
-                </span>
-              </div>
-
-              {/* Bolts */}
-              <div className="absolute top-2.5 left-2.5 w-3.5 h-3.5 rounded-full bg-gray-200 shadow-[inset_0_1px_2px_rgba(0,0,0,0.3),0_1px_1px_rgba(255,255,255,1)] border border-gray-400 z-30 flex items-center justify-center">
-                <div className="w-1.5 h-0.5 bg-gray-400 rotate-45"></div>
-              </div>
-              <div className="absolute top-2.5 right-2.5 w-3.5 h-3.5 rounded-full bg-gray-200 shadow-[inset_0_1px_2px_rgba(0,0,0,0.3),0_1px_1px_rgba(255,255,255,1)] border border-gray-400 z-30 flex items-center justify-center">
-                <div className="w-1.5 h-0.5 bg-gray-400 rotate-12"></div>
-              </div>
-              <div className="absolute bottom-2.5 left-2.5 w-3.5 h-3.5 rounded-full bg-gray-200 shadow-[inset_0_1px_2px_rgba(0,0,0,0.3),0_1px_1px_rgba(255,255,255,1)] border border-gray-400 z-30 flex items-center justify-center">
-                 <div className="w-1.5 h-0.5 bg-gray-400 rotate-90"></div>
-              </div>
-              <div className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 rounded-full bg-gray-200 shadow-[inset_0_1px_2px_rgba(0,0,0,0.3),0_1px_1px_rgba(255,255,255,1)] border border-gray-400 z-30 flex items-center justify-center">
-                <div className="w-1.5 h-0.5 bg-gray-400 rotate-45"></div>
               </div>
 
             </div>
           </div>
 
           {/* Controls */}
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-md mx-auto w-full">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-stone-600 ml-1">
-                Plate Number (3-6 Digits)
+              <label className="text-sm font-medium text-slate-600 ml-1">
+                Plate Number
               </label>
               <div className="relative group">
                 <Input 
                   type="text" 
                   value={plateNumber}
                   onChange={handleNumberChange}
-                  className="h-16 text-3xl tracking-[0.2em] font-mono text-center uppercase border-stone-200 bg-stone-50 focus:bg-white transition-all shadow-sm group-hover:border-stone-300"
+                  className="h-14 text-3xl font-bold text-center border-slate-200 bg-slate-50 focus:bg-white transition-all shadow-sm group-hover:border-slate-300"
                   placeholder="123456"
                   maxLength={6}
-                  data-testid="input-plate-number"
                 />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-300 pointer-events-none">
-                  <Car className="w-8 h-8" />
-                </div>
-              </div>
-              <div className="flex justify-between items-center px-1">
-                <p className="text-xs text-stone-400">
-                  Enter digits only
-                </p>
-                <p className={cn("text-xs font-medium transition-colors", 
-                  plateNumber.length === 6 ? "text-green-600" : "text-stone-400"
-                )}>
-                  {plateNumber.length}/6 digits
-                </p>
               </div>
             </div>
 
             <Button 
               onClick={handleDownload}
               disabled={!plateNumber || isGenerating}
-              className="w-full h-14 text-lg font-medium bg-[#8D1B3D] hover:bg-[#701530] text-white shadow-lg shadow-pink-900/10 transition-all active:scale-[0.99] rounded-xl"
-              data-testid="button-download"
+              className="w-full h-12 text-lg font-medium bg-[#801634] hover:bg-[#601026] text-white transition-all"
             >
               {isGenerating ? (
                 <RefreshCcw className="w-5 h-5 mr-2 animate-spin" />
               ) : (
                 <Download className="w-5 h-5 mr-2" />
               )}
-              {isGenerating ? "Generating Image..." : "Download Plate Image"}
+              {isGenerating ? "Generating..." : "Download Plate"}
             </Button>
           </div>
 
         </Card>
-        
-        <div className="text-center text-stone-400 text-xs">
-          <p>Designed for visualization and novelty purposes only. Not for official use.</p>
-        </div>
       </div>
     </div>
   );

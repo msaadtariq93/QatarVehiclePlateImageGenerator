@@ -120,9 +120,9 @@ export default function PlateGenerator() {
                       className="text-black font-bold tracking-tight leading-none"
                       style={{ 
                         // Dynamic font size based on length to fit 6 digits
-                        fontSize: plateNumber.length > 5 ? "58px" : "72px",
+                        fontSize: plateNumber.length > 5 ? "48px" : "65px",
                         fontFamily: "Inter, sans-serif",
-                        letterSpacing: "-0.02em"
+                        letterSpacing: plateNumber.length > 5 ? "0em" : "-0.02em"
                       }}
                     >
                       {plateNumber || "0000"}

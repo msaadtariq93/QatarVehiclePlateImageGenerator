@@ -1,11 +1,10 @@
 import { useState, useRef } from "react";
-import { Download, RefreshCcw, Car } from "lucide-react";
+import { Download, RefreshCcw } from "lucide-react";
 import { toPng } from "html-to-image";
 import download from "downloadjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 export default function PlateGenerator() {
   const [plateNumber, setPlateNumber] = useState("974");
@@ -18,8 +17,9 @@ export default function PlateGenerator() {
       try {
         const dataUrl = await toPng(plateRef.current, { 
           cacheBust: true, 
-          pixelRatio: 3,
-          backgroundColor: 'transparent'
+          pixelRatio: 1, // 1:1 pixel ratio to keep exact dimensions
+          width: 410,
+          height: 355,
         });
         download(dataUrl, `qatar-plate-${plateNumber}.png`);
       } catch (err) {
@@ -44,77 +44,94 @@ export default function PlateGenerator() {
             Qatar Plate Generator
           </h1>
           <p className="text-slate-500">
-            Enter a number to generate a Qatar vehicle license plate.
+            Enter a number (up to 6 digits) to generate the plate image.
           </p>
         </div>
 
         <Card className="p-8 bg-white shadow-xl border-slate-200/60 rounded-2xl space-y-8">
           
-          {/* Plate Preview Area */}
-          <div className="flex justify-center items-center py-16 bg-slate-50 rounded-xl border border-dashed border-slate-200 overflow-hidden">
-            
-            {/* The Plate Component */}
+          {/* Preview Area - Centered */}
+          <div className="flex justify-center">
+            {/* 
+                The Export Container 
+                Dimensions: 410px x 355px
+                Background: #00426D
+            */}
             <div 
               ref={plateRef}
-              className="relative flex w-[700px] h-[150px] bg-white rounded-xl overflow-hidden shadow-2xl border-[6px] border-black items-stretch"
               style={{
-                boxShadow: "0 20px 40px -10px rgba(0,0,0,0.2)"
+                width: '410px',
+                height: '355px',
+                backgroundColor: '#00426D',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              
-              {/* Left Maroon Section with Serrated Edge */}
-              <div className="relative w-[140px] h-full bg-[#801634] z-10 flex flex-col items-center justify-center shrink-0">
+              {/* The Plate Itself */}
+              <div 
+                className="relative flex bg-white rounded-lg overflow-hidden border-[4px] border-black items-stretch box-border"
+                style={{
+                  width: '380px', // Slightly smaller than container width to fit nicely
+                  height: '85px', // Proportional height for the long plate look
+                  boxShadow: "0 10px 20px rgba(0,0,0,0.3)"
+                }}
+              >
                 
-                {/* Serrated Pattern */}
-                <div className="absolute top-0 bottom-0 -right-[18px] w-[20px] h-full flex flex-col z-20">
-                   {/* Using SVG for perfect jagged edge */}
-                   <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 20 100">
-                     <defs>
-                       <pattern id="serration" x="0" y="0" width="20" height="12.5" patternUnits="userSpaceOnUse">
-                         <path d="M0,0 L20,6.25 L0,12.5 Z" fill="#801634" />
-                       </pattern>
-                     </defs>
-                     <rect x="0" y="0" width="20" height="100" fill="url(#serration)" />
-                   </svg>
+                {/* Left Maroon Section with Serrated Edge */}
+                <div className="relative w-[70px] h-full bg-[#801634] z-10 flex flex-col items-center justify-center shrink-0">
+                  
+                  {/* Serrated Pattern */}
+                  <div className="absolute top-0 bottom-0 -right-[9px] w-[10px] h-full flex flex-col z-20">
+                     <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 10 100">
+                       <defs>
+                         <pattern id="serration" x="0" y="0" width="10" height="12.5" patternUnits="userSpaceOnUse">
+                           <path d="M0,0 L10,6.25 L0,12.5 Z" fill="#801634" />
+                         </pattern>
+                       </defs>
+                       <rect x="0" y="0" width="10" height="100" fill="url(#serration)" />
+                     </svg>
+                  </div>
+
+                  {/* QATAR Vertical Text */}
+                  <div className="flex flex-col items-center justify-center -space-y-[1px] translate-x-[-2px]">
+                    {['Q', 'A', 'T', 'A', 'R'].map((char, i) => (
+                      <span key={i} className="text-white font-bold text-[10px] leading-tight font-sans">
+                        {char}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
-                {/* QATAR Vertical Text */}
-                <div className="flex flex-col items-center justify-center space-y-1 translate-x-[-4px]">
-                  {['Q', 'A', 'T', 'A', 'R'].map((char, i) => (
-                    <span key={i} className="text-white font-bold text-xl leading-none font-sans">
-                      {char}
+                {/* Middle & Right Section */}
+                <div className="flex-1 flex items-center pl-4 pr-2 bg-white relative z-0 justify-between">
+                  
+                  {/* Arabic Text "Qatar" */}
+                  <div className="flex flex-col items-center justify-center pt-1 mr-2 shrink-0">
+                    <span className="text-black text-[38px] leading-none" 
+                          style={{ fontFamily: "'Noto Sans Arabic', sans-serif", fontWeight: 700 }}>
+                      قطر
                     </span>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* Middle & Right Section */}
-              <div className="flex-1 flex items-center pl-8 pr-4 bg-white relative z-0">
-                
-                {/* Arabic Text "Qatar" */}
-                <div className="flex flex-col items-center justify-center mr-12 pt-2">
-                  <span className="text-black text-[80px] leading-none" 
-                        style={{ fontFamily: "'Noto Sans Arabic', sans-serif", fontWeight: 700 }}>
-                    قطر
-                  </span>
-                </div>
+                  {/* Number */}
+                  <div className="flex-1 flex justify-end items-center mr-4">
+                    <span 
+                      className="text-black font-bold tracking-tight leading-none"
+                      style={{ 
+                        // Dynamic font size based on length to fit 6 digits
+                        fontSize: plateNumber.length > 5 ? "58px" : "72px",
+                        fontFamily: "Inter, sans-serif",
+                        letterSpacing: "-0.02em"
+                      }}
+                    >
+                      {plateNumber || "0000"}
+                    </span>
+                  </div>
 
-                {/* Number */}
-                <div className="flex-1 flex justify-center items-center">
-                  <span 
-                    className="text-black font-bold tracking-tight leading-none"
-                    style={{ 
-                      fontSize: "110px",
-                      fontFamily: "Inter, sans-serif",
-                      letterSpacing: "-0.02em"
-                    }}
-                  >
-                    {plateNumber || "0000"}
-                  </span>
                 </div>
 
               </div>
-
             </div>
           </div>
 
@@ -134,19 +151,22 @@ export default function PlateGenerator() {
                   maxLength={6}
                 />
               </div>
+              <p className="text-xs text-center text-slate-400">
+                {plateNumber.length}/6 digits
+              </p>
             </div>
 
             <Button 
               onClick={handleDownload}
               disabled={!plateNumber || isGenerating}
-              className="w-full h-12 text-lg font-medium bg-[#801634] hover:bg-[#601026] text-white transition-all"
+              className="w-full h-12 text-lg font-medium bg-[#00426D] hover:bg-[#003355] text-white transition-all"
             >
               {isGenerating ? (
                 <RefreshCcw className="w-5 h-5 mr-2 animate-spin" />
               ) : (
                 <Download className="w-5 h-5 mr-2" />
               )}
-              {isGenerating ? "Generating..." : "Download Plate"}
+              {isGenerating ? "Generating..." : "Download Image (410x355)"}
             </Button>
           </div>
 

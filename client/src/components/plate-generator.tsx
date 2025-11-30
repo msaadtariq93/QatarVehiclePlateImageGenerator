@@ -17,9 +17,9 @@ export default function PlateGenerator() {
       try {
         const dataUrl = await toPng(plateRef.current, { 
           cacheBust: true, 
-          pixelRatio: 1, // 1:1 pixel ratio to keep exact dimensions
-          width: 410,
-          height: 355,
+          pixelRatio: 1, 
+          width: 820,
+          height: 510,
         });
         download(dataUrl, `qatar-plate-${plateNumber}.png`);
       } catch (err) {
@@ -37,7 +37,7 @@ export default function PlateGenerator() {
 
   return (
     <div className="min-h-screen w-full bg-slate-100 flex items-center justify-center p-4 font-sans">
-      <div className="w-full max-w-4xl space-y-8">
+      <div className="w-full max-w-5xl space-y-8">
         
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold tracking-tight text-slate-800">
@@ -51,30 +51,33 @@ export default function PlateGenerator() {
         <Card className="p-8 bg-white shadow-xl border-slate-200/60 rounded-2xl space-y-8">
           
           {/* Preview Area - Centered */}
-          <div className="flex justify-center">
+          <div className="flex justify-center overflow-auto py-4">
             {/* 
                 The Export Container 
-                Dimensions: 410px x 355px
+                Dimensions: 820px x 510px
                 Background: #00426D
             */}
             <div 
               ref={plateRef}
               style={{
-                width: '410px',
-                height: '355px',
+                width: '820px',
+                height: '510px',
                 backgroundColor: '#00426D',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                flexShrink: 0,
               }}
             >
-              {/* The Plate Itself */}
+              {/* The Plate Itself - Scaled up 2x to fit the larger frame */}
               <div 
                 className="relative flex bg-white rounded-lg overflow-hidden border-[4px] border-black items-stretch box-border"
                 style={{
-                  width: '380px', // Slightly smaller than container width to fit nicely
-                  height: '85px', // Proportional height for the long plate look
-                  boxShadow: "0 10px 20px rgba(0,0,0,0.3)"
+                  width: '380px', 
+                  height: '85px',
+                  boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
+                  transform: "scale(2)",
+                  transformOrigin: "center"
                 }}
               >
                 
@@ -166,7 +169,7 @@ export default function PlateGenerator() {
               ) : (
                 <Download className="w-5 h-5 mr-2" />
               )}
-              {isGenerating ? "Generating..." : "Download Image (410x355)"}
+              {isGenerating ? "Generating..." : "Download Image (820x510)"}
             </Button>
           </div>
 

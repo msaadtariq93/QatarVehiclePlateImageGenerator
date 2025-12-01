@@ -29,28 +29,28 @@ function generateSvgCode(plateNumber: string, plateType: PlateType): string {
   const displayNumber = plateNumber || "0000";
   
   if (plateType === "commercial") {
-    const fontSize = plateNumber.length > 5 ? 80 : 110;
+    const fontSize = plateNumber.length > 5 ? 100 : 130;
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 510" width="820" height="510">
   <!-- Background -->
   <rect width="820" height="510" fill="#00426D"/>
   
-  <!-- Plate Container -->
-  <g transform="translate(30, 85)">
+  <!-- Plate Container (Taller commercial plate) -->
+  <g transform="translate(130, 50)">
     <!-- Plate Background (Black) with Border -->
-    <rect x="0" y="0" width="760" height="170" rx="16" ry="16" fill="black" stroke="#333" stroke-width="4"/>
+    <rect x="0" y="0" width="560" height="220" rx="16" ry="16" fill="black" stroke="#444" stroke-width="6"/>
     
     <!-- QATAR Vertical Text (White) -->
-    <text x="50" y="35" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">Q</text>
-    <text x="50" y="65" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">A</text>
-    <text x="50" y="95" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">T</text>
-    <text x="50" y="125" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">A</text>
-    <text x="50" y="155" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">R</text>
+    <text x="50" y="50" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">Q</text>
+    <text x="50" y="85" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">A</text>
+    <text x="50" y="120" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">T</text>
+    <text x="50" y="155" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">A</text>
+    <text x="50" y="190" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">R</text>
     
     <!-- Arabic Text قطر (White) -->
-    <text x="480" y="60" font-family="Noto Sans Arabic, Arial" font-size="56" font-weight="700" fill="white" text-anchor="middle" direction="rtl">قطر</text>
+    <text x="340" y="85" font-family="Noto Sans Arabic, Arial" font-size="70" font-weight="700" fill="white" text-anchor="middle" direction="rtl">قطر</text>
     
     <!-- Number (White) -->
-    <text x="480" y="140" font-family="Inter, Arial, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle">${displayNumber}</text>
+    <text x="340" y="175" font-family="Inter, Arial, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle">${displayNumber}</text>
   </g>
 </svg>`;
   }
@@ -230,22 +230,22 @@ export default function PlateGenerator() {
                   </div>
                 </div>
               ) : (
-                /* Commercial Plate - Black with White Text */
+                /* Commercial Plate - Black with White Text - TALLER */
                 <div 
-                  className="relative flex bg-black rounded-lg overflow-hidden border-[3px] border-gray-700 items-stretch box-border"
+                  className="relative flex bg-black rounded-xl overflow-hidden border-[3px] border-gray-600 items-stretch box-border"
                   style={{
-                    width: '380px', 
-                    height: '85px',
-                    boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
+                    width: '280px', 
+                    height: '110px',
+                    boxShadow: "0 10px 20px rgba(0,0,0,0.4)",
                     transform: "scale(2)",
                     transformOrigin: "center"
                   }}
                 >
                   {/* Left Section - QATAR Vertical */}
-                  <div className="w-[50px] h-full flex flex-col items-center justify-center shrink-0">
-                    <div className="flex flex-col items-center justify-center -space-y-[1px]">
+                  <div className="w-[50px] h-full flex flex-col items-center justify-center shrink-0 border-r border-gray-700">
+                    <div className="flex flex-col items-center justify-center -space-y-[2px]">
                       {['Q', 'A', 'T', 'A', 'R'].map((char, i) => (
-                        <span key={i} className="text-white font-bold text-[12px] leading-tight font-sans tracking-wider">
+                        <span key={i} className="text-white font-bold text-[14px] leading-tight font-sans tracking-wide">
                           {char}
                         </span>
                       ))}
@@ -253,20 +253,20 @@ export default function PlateGenerator() {
                   </div>
 
                   {/* Right Section - Arabic + Number */}
-                  <div className="flex-1 flex flex-col items-center justify-center pr-4">
+                  <div className="flex-1 flex flex-col items-center justify-center pr-2">
                     {/* Arabic Text "Qatar" */}
-                    <span className="text-white text-[28px] leading-none -mt-1" 
+                    <span className="text-white text-[32px] leading-none mb-1" 
                           style={{ fontFamily: "'Noto Sans Arabic', sans-serif", fontWeight: 700 }}>
                       قطر
                     </span>
 
                     {/* Number */}
                     <span 
-                      className="text-white font-bold tracking-tight leading-none mt-1"
+                      className="text-white font-bold tracking-tight leading-none"
                       style={{ 
-                        fontSize: plateNumber.length > 5 ? "40px" : "52px",
+                        fontSize: plateNumber.length > 5 ? "48px" : "62px",
                         fontFamily: "Inter, sans-serif",
-                        letterSpacing: plateNumber.length > 5 ? "0em" : "-0.02em"
+                        letterSpacing: plateNumber.length > 5 ? "-0.01em" : "-0.02em"
                       }}
                     >
                       {plateNumber || "0000"}

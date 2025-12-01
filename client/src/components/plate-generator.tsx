@@ -23,11 +23,32 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
+type GeneratorType = "vehicle" | "mobile";
 type PlateType = "private" | "commercial";
+type MobileProvider = "ooredoo" | "vodafone";
 
-function generateSvgCode(plateNumber: string, plateType: PlateType): string {
+function generateSvgCode(
+  type: GeneratorType, 
+  plateNumber: string, 
+  plateType?: PlateType,
+  provider?: MobileProvider
+): string {
   const displayNumber = plateNumber || "0000";
   
+  if (type === "mobile") {
+    // Mobile number SVG - placeholder for now, will be updated with actual templates
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 510" width="820" height="510">
+  <!-- Background -->
+  <rect width="820" height="510" fill="#00426D"/>
+  
+  <!-- Placeholder for ${provider} mobile template -->
+  <text x="410" y="255" font-family="Inter, Arial, sans-serif" font-size="24" fill="white" text-anchor="middle">
+    ${provider?.toUpperCase()} - ${displayNumber}
+  </text>
+</svg>`;
+  }
+  
+  // Vehicle plate logic
   if (plateType === "commercial") {
     const fontSize = plateNumber.length > 5 ? 100 : 130;
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 510" width="820" height="510">
@@ -96,8 +117,11 @@ function generateSvgCode(plateNumber: string, plateType: PlateType): string {
 }
 
 export default function PlateGenerator() {
+  const [generatorType, setGeneratorType] = useState<GeneratorType>("vehicle");
   const [plateNumber, setPlateNumber] = useState("974");
+  const [phoneNumber, setPhoneNumber] = useState("33123456");
   const [plateType, setPlateType] = useState<PlateType>("private");
+  const [provider, setProvider] = useState<MobileProvider>("ooredoo");
   const plateRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -112,7 +136,10 @@ export default function PlateGenerator() {
           width: 820,
           height: 510,
         });
-        download(dataUrl, `qatar-${plateType}-plate-${plateNumber}.png`);
+        const filename = generatorType === "vehicle" 
+          ? `qatar-${plateType}-plate-${plateNumber}.png`
+          : `qatar-${provider}-mobile-${phoneNumber}.png`;
+        download(dataUrl, filename);
       } catch (err) {
         console.error("Failed to generate image", err);
       } finally {
@@ -121,13 +148,20 @@ export default function PlateGenerator() {
     }
   };
 
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePlateNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 6);
     setPlateNumber(value);
   };
 
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 8);
+    setPhoneNumber(value);
+  };
+
   const handleCopySvg = async () => {
-    const svgCode = generateSvgCode(plateNumber, plateType);
+    const svgCode = generatorType === "vehicle"
+      ? generateSvgCode("vehicle", plateNumber, plateType)
+      : generateSvgCode("mobile", phoneNumber, undefined, provider);
     try {
       await navigator.clipboard.writeText(svgCode);
       setCopied(true);
@@ -137,7 +171,11 @@ export default function PlateGenerator() {
     }
   };
 
-  const svgCode = generateSvgCode(plateNumber, plateType);
+  const svgCode = generatorType === "vehicle"
+    ? generateSvgCode("vehicle", plateNumber, plateType)
+    : generateSvgCode("mobile", phoneNumber, undefined, provider);
+
+  const currentNumber = generatorType === "vehicle" ? plateNumber : phoneNumber;
 
   return (
     <div className="min-h-screen w-full bg-slate-100 flex items-center justify-center p-4 font-sans">
@@ -148,7 +186,7 @@ export default function PlateGenerator() {
             Qatar Plate Generator
           </h1>
           <p className="text-slate-500">
-            Enter a number (up to 6 digits) to generate the plate image.
+            Generate vehicle plates or mobile number images.
           </p>
         </div>
 
@@ -168,7 +206,14 @@ export default function PlateGenerator() {
                 flexShrink: 0,
               }}
             >
-              {plateType === "private" ? (
+              {generatorType === "mobile" ? (
+                /* Mobile Number - Placeholder */
+                <div className="text-white text-center">
+                  <div className="text-2xl font-bold mb-2">{provider === "ooredoo" ? "Ooredoo" : "Vodafone"}</div>
+                  <div className="text-4xl font-bold">{phoneNumber || "00000000"}</div>
+                  <div className="text-sm mt-4 opacity-70">Template will be added</div>
+                </div>
+              ) : plateType === "private" ? (
                 /* Private Plate - White with Maroon Flag */
                 <div 
                   className="relative flex bg-white rounded-lg overflow-hidden border-[4px] border-black items-stretch box-border"
@@ -280,47 +325,106 @@ export default function PlateGenerator() {
           {/* Controls */}
           <div className="space-y-6 max-w-md mx-auto w-full">
             
-            {/* Plate Type Selector */}
+            {/* Type Selector */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-600 ml-1">
-                Plate Type
+                Type
               </label>
-              <Select value={plateType} onValueChange={(v) => setPlateType(v as PlateType)}>
-                <SelectTrigger className="h-12 text-lg border-slate-200 bg-slate-50 focus:bg-white" data-testid="select-plate-type">
-                  <SelectValue placeholder="Select plate type" />
+              <Select value={generatorType} onValueChange={(v) => setGeneratorType(v as GeneratorType)}>
+                <SelectTrigger className="h-12 text-lg border-slate-200 bg-slate-50 focus:bg-white" data-testid="select-generator-type">
+                  <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="private" data-testid="option-private">Private</SelectItem>
-                  <SelectItem value="commercial" data-testid="option-commercial">Commercial</SelectItem>
+                  <SelectItem value="vehicle" data-testid="option-vehicle">Vehicle Plate</SelectItem>
+                  <SelectItem value="mobile" data-testid="option-mobile">Mobile Number</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Plate Number Input */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-600 ml-1">
-                Plate Number
-              </label>
-              <div className="relative group">
-                <Input 
-                  type="text" 
-                  value={plateNumber}
-                  onChange={handleNumberChange}
-                  className="h-14 text-3xl font-bold text-center border-slate-200 bg-slate-50 focus:bg-white transition-all shadow-sm group-hover:border-slate-300"
-                  placeholder="123456"
-                  maxLength={6}
-                  data-testid="input-plate-number"
-                />
-              </div>
-              <p className="text-xs text-center text-slate-400">
-                {plateNumber.length}/6 digits
-              </p>
-            </div>
+            {generatorType === "vehicle" ? (
+              <>
+                {/* Plate Type Selector */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-600 ml-1">
+                    Plate Type
+                  </label>
+                  <Select value={plateType} onValueChange={(v) => setPlateType(v as PlateType)}>
+                    <SelectTrigger className="h-12 text-lg border-slate-200 bg-slate-50 focus:bg-white" data-testid="select-plate-type">
+                      <SelectValue placeholder="Select plate type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="private" data-testid="option-private">Private</SelectItem>
+                      <SelectItem value="commercial" data-testid="option-commercial">Commercial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Plate Number Input */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-600 ml-1">
+                    Plate Number
+                  </label>
+                  <div className="relative group">
+                    <Input 
+                      type="text" 
+                      value={plateNumber}
+                      onChange={handlePlateNumberChange}
+                      className="h-14 text-3xl font-bold text-center border-slate-200 bg-slate-50 focus:bg-white transition-all shadow-sm group-hover:border-slate-300"
+                      placeholder="123456"
+                      maxLength={6}
+                      data-testid="input-plate-number"
+                    />
+                  </div>
+                  <p className="text-xs text-center text-slate-400">
+                    {plateNumber.length}/6 digits
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Provider Selector */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-600 ml-1">
+                    Provider
+                  </label>
+                  <Select value={provider} onValueChange={(v) => setProvider(v as MobileProvider)}>
+                    <SelectTrigger className="h-12 text-lg border-slate-200 bg-slate-50 focus:bg-white" data-testid="select-provider">
+                      <SelectValue placeholder="Select provider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ooredoo" data-testid="option-ooredoo">Ooredoo</SelectItem>
+                      <SelectItem value="vodafone" data-testid="option-vodafone">Vodafone</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Phone Number Input */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-600 ml-1">
+                    Phone Number
+                  </label>
+                  <div className="relative group">
+                    <Input 
+                      type="text" 
+                      value={phoneNumber}
+                      onChange={handlePhoneNumberChange}
+                      className="h-14 text-3xl font-bold text-center border-slate-200 bg-slate-50 focus:bg-white transition-all shadow-sm group-hover:border-slate-300"
+                      placeholder="12345678"
+                      maxLength={8}
+                      data-testid="input-phone-number"
+                    />
+                  </div>
+                  <p className="text-xs text-center text-slate-400">
+                    {phoneNumber.length}/8 digits
+                  </p>
+                </div>
+              </>
+            )}
 
             <div className="flex gap-3">
               <Button 
                 onClick={handleDownload}
-                disabled={!plateNumber || isGenerating}
+                disabled={!currentNumber || isGenerating}
                 className="flex-1 h-12 text-lg font-medium bg-[#00426D] hover:bg-[#003355] text-white transition-all"
                 data-testid="button-download"
               >

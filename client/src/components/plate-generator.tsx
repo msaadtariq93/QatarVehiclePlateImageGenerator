@@ -33,19 +33,49 @@ function generateSvgCode(
   plateType?: PlateType,
   provider?: MobileProvider
 ): string {
-  const displayNumber = plateNumber || "0000";
+  const displayNumber = plateNumber || "00000000";
   
   if (type === "mobile") {
-    // Mobile number SVG - placeholder for now, will be updated with actual templates
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 510" width="820" height="510">
+    if (provider === "ooredoo") {
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 510" width="820" height="510">
   <!-- Background -->
   <rect width="820" height="510" fill="#00426D"/>
   
-  <!-- Placeholder for ${provider} mobile template -->
-  <text x="410" y="255" font-family="Inter, Arial, sans-serif" font-size="24" fill="white" text-anchor="middle">
-    ${provider?.toUpperCase()} - ${displayNumber}
-  </text>
+  <!-- Mobile Card Container -->
+  <g transform="translate(160, 120)">
+    <!-- Card Background with Border -->
+    <rect x="0" y="0" width="500" height="270" rx="8" ry="8" fill="white" stroke="black" stroke-width="4"/>
+    
+    <!-- Ooredoo Logo Text -->
+    <text x="250" y="90" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#E30613" text-anchor="middle">ooredoo</text>
+    
+    <!-- Phone Number -->
+    <text x="250" y="200" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="black" text-anchor="middle" letter-spacing="2">${displayNumber}</text>
+  </g>
 </svg>`;
+    } else {
+      // Vodafone
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 510" width="820" height="510">
+  <!-- Background -->
+  <rect width="820" height="510" fill="#00426D"/>
+  
+  <!-- Mobile Card Container -->
+  <g transform="translate(160, 120)">
+    <!-- Card Background with Border -->
+    <rect x="0" y="0" width="500" height="270" rx="8" ry="8" fill="white" stroke="black" stroke-width="4"/>
+    
+    <!-- Vodafone Logo (Speech Mark Circle) -->
+    <circle cx="210" cy="75" r="22" fill="#E60000"/>
+    <path d="M 210 65 Q 215 70, 210 75 Q 205 70, 210 65" fill="white"/>
+    
+    <!-- Vodafone Text -->
+    <text x="245" y="85" font-family="Arial, sans-serif" font-size="38" font-weight="bold" fill="#E60000" text-anchor="start">vodafone</text>
+    
+    <!-- Phone Number -->
+    <text x="250" y="200" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="black" text-anchor="middle" letter-spacing="2">${displayNumber}</text>
+  </g>
+</svg>`;
+    }
   }
   
   // Vehicle plate logic
@@ -119,7 +149,7 @@ function generateSvgCode(
 export default function PlateGenerator() {
   const [generatorType, setGeneratorType] = useState<GeneratorType>("vehicle");
   const [plateNumber, setPlateNumber] = useState("974");
-  const [phoneNumber, setPhoneNumber] = useState("33123456");
+  const [phoneNumber, setPhoneNumber] = useState("50505050");
   const [plateType, setPlateType] = useState<PlateType>("private");
   const [provider, setProvider] = useState<MobileProvider>("ooredoo");
   const plateRef = useRef<HTMLDivElement>(null);
@@ -207,11 +237,41 @@ export default function PlateGenerator() {
               }}
             >
               {generatorType === "mobile" ? (
-                /* Mobile Number - Placeholder */
-                <div className="text-white text-center">
-                  <div className="text-2xl font-bold mb-2">{provider === "ooredoo" ? "Ooredoo" : "Vodafone"}</div>
-                  <div className="text-4xl font-bold">{phoneNumber || "00000000"}</div>
-                  <div className="text-sm mt-4 opacity-70">Template will be added</div>
+                /* Mobile Number Card */
+                <div 
+                  className="relative bg-white rounded-lg border-[2px] border-black overflow-hidden"
+                  style={{
+                    width: '250px',
+                    height: '135px',
+                    boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
+                    transform: "scale(2)",
+                    transformOrigin: "center"
+                  }}
+                >
+                  <div className="flex flex-col items-center justify-center h-full px-4 py-3">
+                    {/* Logo */}
+                    <div className="mb-3">
+                      {provider === "ooredoo" ? (
+                        <span className="text-[24px] font-bold tracking-tight" style={{ color: "#E30613" }}>
+                          ooredoo
+                        </span>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <div className="w-[22px] h-[22px] rounded-full flex items-center justify-center" style={{ backgroundColor: "#E60000" }}>
+                            <div className="w-[8px] h-[8px] bg-white rounded-full"></div>
+                          </div>
+                          <span className="text-[19px] font-bold tracking-tight" style={{ color: "#E60000" }}>
+                            vodafone
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Phone Number */}
+                    <div className="text-black font-bold text-[40px] tracking-wider leading-none">
+                      {phoneNumber || "00000000"}
+                    </div>
+                  </div>
                 </div>
               ) : plateType === "private" ? (
                 /* Private Plate - White with Maroon Flag */

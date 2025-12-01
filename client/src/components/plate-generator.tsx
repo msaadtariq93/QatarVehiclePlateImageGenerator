@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Drawer,
   DrawerClose,
   DrawerContent,
@@ -16,8 +23,39 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-function generateSvgCode(plateNumber: string): string {
+type PlateType = "private" | "commercial";
+
+function generateSvgCode(plateNumber: string, plateType: PlateType): string {
   const displayNumber = plateNumber || "0000";
+  
+  if (plateType === "commercial") {
+    const fontSize = plateNumber.length > 5 ? 80 : 110;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 510" width="820" height="510">
+  <!-- Background -->
+  <rect width="820" height="510" fill="#00426D"/>
+  
+  <!-- Plate Container -->
+  <g transform="translate(30, 85)">
+    <!-- Plate Background (Black) with Border -->
+    <rect x="0" y="0" width="760" height="170" rx="16" ry="16" fill="black" stroke="#333" stroke-width="4"/>
+    
+    <!-- QATAR Vertical Text (White) -->
+    <text x="50" y="35" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">Q</text>
+    <text x="50" y="65" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">A</text>
+    <text x="50" y="95" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">T</text>
+    <text x="50" y="125" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">A</text>
+    <text x="50" y="155" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">R</text>
+    
+    <!-- Arabic Text قطر (White) -->
+    <text x="480" y="60" font-family="Noto Sans Arabic, Arial" font-size="56" font-weight="700" fill="white" text-anchor="middle" direction="rtl">قطر</text>
+    
+    <!-- Number (White) -->
+    <text x="480" y="140" font-family="Inter, Arial, sans-serif" font-size="${fontSize}" font-weight="bold" fill="white" text-anchor="middle">${displayNumber}</text>
+  </g>
+</svg>`;
+  }
+  
+  // Private plate
   const fontSize = plateNumber.length > 5 ? 96 : 130;
   const numberX = plateNumber.length > 5 ? 560 : 580;
   
@@ -59,6 +97,7 @@ function generateSvgCode(plateNumber: string): string {
 
 export default function PlateGenerator() {
   const [plateNumber, setPlateNumber] = useState("974");
+  const [plateType, setPlateType] = useState<PlateType>("private");
   const plateRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -73,7 +112,7 @@ export default function PlateGenerator() {
           width: 820,
           height: 510,
         });
-        download(dataUrl, `qatar-plate-${plateNumber}.png`);
+        download(dataUrl, `qatar-${plateType}-plate-${plateNumber}.png`);
       } catch (err) {
         console.error("Failed to generate image", err);
       } finally {
@@ -88,7 +127,7 @@ export default function PlateGenerator() {
   };
 
   const handleCopySvg = async () => {
-    const svgCode = generateSvgCode(plateNumber);
+    const svgCode = generateSvgCode(plateNumber, plateType);
     try {
       await navigator.clipboard.writeText(svgCode);
       setCopied(true);
@@ -98,7 +137,7 @@ export default function PlateGenerator() {
     }
   };
 
-  const svgCode = generateSvgCode(plateNumber);
+  const svgCode = generateSvgCode(plateNumber, plateType);
 
   return (
     <div className="min-h-screen w-full bg-slate-100 flex items-center justify-center p-4 font-sans">
@@ -117,11 +156,6 @@ export default function PlateGenerator() {
           
           {/* Preview Area - Centered */}
           <div className="flex justify-center overflow-auto py-4">
-            {/* 
-                The Export Container 
-                Dimensions: 820px x 510px
-                Background: #00426D
-            */}
             <div 
               ref={plateRef}
               style={{
@@ -134,60 +168,103 @@ export default function PlateGenerator() {
                 flexShrink: 0,
               }}
             >
-              {/* The Plate Itself - Scaled up 2x to fit the larger frame */}
-              <div 
-                className="relative flex bg-white rounded-lg overflow-hidden border-[4px] border-black items-stretch box-border"
-                style={{
-                  width: '380px', 
-                  height: '85px',
-                  boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
-                  transform: "scale(2)",
-                  transformOrigin: "center"
-                }}
-              >
-                
-                {/* Left Maroon Section with Serrated Edge */}
-                <div className="relative w-[70px] h-full bg-[#801634] z-10 flex flex-col items-center justify-center shrink-0">
-                  
-                  {/* Serrated Pattern */}
-                  <div className="absolute top-0 bottom-0 -right-[9px] w-[10px] h-full flex flex-col z-20">
-                     <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 10 100">
-                       <defs>
-                         <pattern id="serration" x="0" y="0" width="10" height="12.5" patternUnits="userSpaceOnUse">
-                           <path d="M0,0 L10,6.25 L0,12.5 Z" fill="#801634" />
-                         </pattern>
-                       </defs>
-                       <rect x="0" y="0" width="10" height="100" fill="url(#serration)" />
-                     </svg>
+              {plateType === "private" ? (
+                /* Private Plate - White with Maroon Flag */
+                <div 
+                  className="relative flex bg-white rounded-lg overflow-hidden border-[4px] border-black items-stretch box-border"
+                  style={{
+                    width: '380px', 
+                    height: '85px',
+                    boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
+                    transform: "scale(2)",
+                    transformOrigin: "center"
+                  }}
+                >
+                  {/* Left Maroon Section with Serrated Edge */}
+                  <div className="relative w-[70px] h-full bg-[#801634] z-10 flex flex-col items-center justify-center shrink-0">
+                    {/* Serrated Pattern */}
+                    <div className="absolute top-0 bottom-0 -right-[9px] w-[10px] h-full flex flex-col z-20">
+                       <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 10 100">
+                         <defs>
+                           <pattern id="serration-private" x="0" y="0" width="10" height="12.5" patternUnits="userSpaceOnUse">
+                             <path d="M0,0 L10,6.25 L0,12.5 Z" fill="#801634" />
+                           </pattern>
+                         </defs>
+                         <rect x="0" y="0" width="10" height="100" fill="url(#serration-private)" />
+                       </svg>
+                    </div>
+
+                    {/* QATAR Vertical Text */}
+                    <div className="flex flex-col items-center justify-center -space-y-[1px] translate-x-[-2px]">
+                      {['Q', 'A', 'T', 'A', 'R'].map((char, i) => (
+                        <span key={i} className="text-white font-bold text-[10px] leading-tight font-sans">
+                          {char}
+                        </span>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* QATAR Vertical Text */}
-                  <div className="flex flex-col items-center justify-center -space-y-[1px] translate-x-[-2px]">
-                    {['Q', 'A', 'T', 'A', 'R'].map((char, i) => (
-                      <span key={i} className="text-white font-bold text-[10px] leading-tight font-sans">
-                        {char}
+                  {/* Middle & Right Section */}
+                  <div className="flex-1 flex items-center pl-4 pr-2 bg-white relative z-0 justify-between">
+                    {/* Arabic Text "Qatar" */}
+                    <div className="flex flex-col items-center justify-center pt-1 mr-2 shrink-0">
+                      <span className="text-black text-[38px] leading-none" 
+                            style={{ fontFamily: "'Noto Sans Arabic', sans-serif", fontWeight: 700 }}>
+                        قطر
                       </span>
-                    ))}
+                    </div>
+
+                    {/* Number */}
+                    <div className="flex-1 flex justify-end items-center mr-4">
+                      <span 
+                        className="text-black font-bold tracking-tight leading-none"
+                        style={{ 
+                          fontSize: plateNumber.length > 5 ? "48px" : "65px",
+                          fontFamily: "Inter, sans-serif",
+                          letterSpacing: plateNumber.length > 5 ? "0em" : "-0.02em"
+                        }}
+                      >
+                        {plateNumber || "0000"}
+                      </span>
+                    </div>
                   </div>
                 </div>
+              ) : (
+                /* Commercial Plate - Black with White Text */
+                <div 
+                  className="relative flex bg-black rounded-lg overflow-hidden border-[3px] border-gray-700 items-stretch box-border"
+                  style={{
+                    width: '380px', 
+                    height: '85px',
+                    boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
+                    transform: "scale(2)",
+                    transformOrigin: "center"
+                  }}
+                >
+                  {/* Left Section - QATAR Vertical */}
+                  <div className="w-[50px] h-full flex flex-col items-center justify-center shrink-0">
+                    <div className="flex flex-col items-center justify-center -space-y-[1px]">
+                      {['Q', 'A', 'T', 'A', 'R'].map((char, i) => (
+                        <span key={i} className="text-white font-bold text-[12px] leading-tight font-sans tracking-wider">
+                          {char}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
 
-                {/* Middle & Right Section */}
-                <div className="flex-1 flex items-center pl-4 pr-2 bg-white relative z-0 justify-between">
-                  
-                  {/* Arabic Text "Qatar" */}
-                  <div className="flex flex-col items-center justify-center pt-1 mr-2 shrink-0">
-                    <span className="text-black text-[38px] leading-none" 
+                  {/* Right Section - Arabic + Number */}
+                  <div className="flex-1 flex flex-col items-center justify-center pr-4">
+                    {/* Arabic Text "Qatar" */}
+                    <span className="text-white text-[28px] leading-none -mt-1" 
                           style={{ fontFamily: "'Noto Sans Arabic', sans-serif", fontWeight: 700 }}>
                       قطر
                     </span>
-                  </div>
 
-                  {/* Number */}
-                  <div className="flex-1 flex justify-end items-center mr-4">
+                    {/* Number */}
                     <span 
-                      className="text-black font-bold tracking-tight leading-none"
+                      className="text-white font-bold tracking-tight leading-none mt-1"
                       style={{ 
-                        fontSize: plateNumber.length > 5 ? "48px" : "65px",
+                        fontSize: plateNumber.length > 5 ? "40px" : "52px",
                         fontFamily: "Inter, sans-serif",
                         letterSpacing: plateNumber.length > 5 ? "0em" : "-0.02em"
                       }}
@@ -195,15 +272,31 @@ export default function PlateGenerator() {
                       {plateNumber || "0000"}
                     </span>
                   </div>
-
                 </div>
-
-              </div>
+              )}
             </div>
           </div>
 
           {/* Controls */}
           <div className="space-y-6 max-w-md mx-auto w-full">
+            
+            {/* Plate Type Selector */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-600 ml-1">
+                Plate Type
+              </label>
+              <Select value={plateType} onValueChange={(v) => setPlateType(v as PlateType)}>
+                <SelectTrigger className="h-12 text-lg border-slate-200 bg-slate-50 focus:bg-white" data-testid="select-plate-type">
+                  <SelectValue placeholder="Select plate type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="private" data-testid="option-private">Private</SelectItem>
+                  <SelectItem value="commercial" data-testid="option-commercial">Commercial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Plate Number Input */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-600 ml-1">
                 Plate Number

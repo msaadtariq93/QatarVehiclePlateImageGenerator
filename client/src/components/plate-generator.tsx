@@ -1,15 +1,67 @@
 import { useState, useRef } from "react";
-import { Download, RefreshCcw } from "lucide-react";
+import { Download, RefreshCcw, Code, Copy, Check } from "lucide-react";
 import { toPng } from "html-to-image";
 import download from "downloadjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+
+function generateSvgCode(plateNumber: string): string {
+  const displayNumber = plateNumber || "0000";
+  const fontSize = plateNumber.length > 5 ? 96 : 130;
+  const numberX = plateNumber.length > 5 ? 560 : 580;
+  
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 510" width="820" height="510">
+  <!-- Background -->
+  <rect width="820" height="510" fill="#00426D"/>
+  
+  <!-- Plate Container -->
+  <g transform="translate(30, 85)">
+    <!-- Plate Background with Border -->
+    <rect x="0" y="0" width="760" height="170" rx="16" ry="16" fill="white" stroke="black" stroke-width="8"/>
+    
+    <!-- Maroon Section -->
+    <rect x="4" y="4" width="140" height="162" fill="#801634"/>
+    
+    <!-- Serrated Edge Pattern -->
+    <defs>
+      <pattern id="serration" x="0" y="0" width="20" height="25" patternUnits="userSpaceOnUse">
+        <path d="M0,0 L20,12.5 L0,25 Z" fill="#801634"/>
+      </pattern>
+    </defs>
+    <rect x="144" y="4" width="20" height="162" fill="url(#serration)"/>
+    
+    <!-- QATAR Vertical Text -->
+    <text x="74" y="35" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">Q</text>
+    <text x="74" y="60" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">A</text>
+    <text x="74" y="85" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">T</text>
+    <text x="74" y="110" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">A</text>
+    <text x="74" y="135" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">R</text>
+    
+    <!-- Arabic Text قطر -->
+    <text x="260" y="115" font-family="Noto Sans Arabic, Arial" font-size="76" font-weight="700" fill="black" text-anchor="middle" direction="rtl">قطر</text>
+    
+    <!-- Number -->
+    <text x="${numberX}" y="120" font-family="Inter, Arial, sans-serif" font-size="${fontSize}" font-weight="bold" fill="black" text-anchor="middle">${displayNumber}</text>
+  </g>
+</svg>`;
+}
 
 export default function PlateGenerator() {
   const [plateNumber, setPlateNumber] = useState("974");
   const plateRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleDownload = async () => {
     if (plateRef.current) {
@@ -34,6 +86,19 @@ export default function PlateGenerator() {
     const value = e.target.value.replace(/\D/g, "").slice(0, 6);
     setPlateNumber(value);
   };
+
+  const handleCopySvg = async () => {
+    const svgCode = generateSvgCode(plateNumber);
+    try {
+      await navigator.clipboard.writeText(svgCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy SVG", err);
+    }
+  };
+
+  const svgCode = generateSvgCode(plateNumber);
 
   return (
     <div className="min-h-screen w-full bg-slate-100 flex items-center justify-center p-4 font-sans">
@@ -122,7 +187,6 @@ export default function PlateGenerator() {
                     <span 
                       className="text-black font-bold tracking-tight leading-none"
                       style={{ 
-                        // Dynamic font size based on length to fit 6 digits
                         fontSize: plateNumber.length > 5 ? "48px" : "65px",
                         fontFamily: "Inter, sans-serif",
                         letterSpacing: plateNumber.length > 5 ? "0em" : "-0.02em"
@@ -152,6 +216,7 @@ export default function PlateGenerator() {
                   className="h-14 text-3xl font-bold text-center border-slate-200 bg-slate-50 focus:bg-white transition-all shadow-sm group-hover:border-slate-300"
                   placeholder="123456"
                   maxLength={6}
+                  data-testid="input-plate-number"
                 />
               </div>
               <p className="text-xs text-center text-slate-400">
@@ -159,18 +224,71 @@ export default function PlateGenerator() {
               </p>
             </div>
 
-            <Button 
-              onClick={handleDownload}
-              disabled={!plateNumber || isGenerating}
-              className="w-full h-12 text-lg font-medium bg-[#00426D] hover:bg-[#003355] text-white transition-all"
-            >
-              {isGenerating ? (
-                <RefreshCcw className="w-5 h-5 mr-2 animate-spin" />
-              ) : (
-                <Download className="w-5 h-5 mr-2" />
-              )}
-              {isGenerating ? "Generating..." : "Download Image (820x510)"}
-            </Button>
+            <div className="flex gap-3">
+              <Button 
+                onClick={handleDownload}
+                disabled={!plateNumber || isGenerating}
+                className="flex-1 h-12 text-lg font-medium bg-[#00426D] hover:bg-[#003355] text-white transition-all"
+                data-testid="button-download"
+              >
+                {isGenerating ? (
+                  <RefreshCcw className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <Download className="w-5 h-5 mr-2" />
+                )}
+                {isGenerating ? "Generating..." : "Download PNG"}
+              </Button>
+
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button 
+                    variant="outline"
+                    className="h-12 px-4 border-slate-300 hover:bg-slate-50"
+                    data-testid="button-svg-code"
+                  >
+                    <Code className="w-5 h-5" />
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent className="max-h-[85vh]">
+                  <DrawerHeader>
+                    <DrawerTitle>SVG Code</DrawerTitle>
+                    <DrawerDescription>
+                      Copy the SVG code below to use in your projects.
+                    </DrawerDescription>
+                  </DrawerHeader>
+                  <div className="px-4 pb-4">
+                    <div className="relative">
+                      <pre className="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-auto max-h-[50vh] text-sm font-mono">
+                        <code>{svgCode}</code>
+                      </pre>
+                      <Button
+                        onClick={handleCopySvg}
+                        size="sm"
+                        className="absolute top-3 right-3 bg-slate-700 hover:bg-slate-600"
+                        data-testid="button-copy-svg"
+                      >
+                        {copied ? (
+                          <>
+                            <Check className="w-4 h-4 mr-1" />
+                            Copied!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-4 h-4 mr-1" />
+                            Copy
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <DrawerFooter>
+                    <DrawerClose asChild>
+                      <Button variant="outline">Close</Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
+            </div>
           </div>
 
         </Card>

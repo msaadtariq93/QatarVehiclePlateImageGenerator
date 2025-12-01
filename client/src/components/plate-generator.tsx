@@ -64,12 +64,8 @@ function generateSvgCode(
     <!-- Card Background with Border -->
     <rect x="0" y="0" width="500" height="270" rx="8" ry="8" fill="white" stroke="black" stroke-width="4"/>
     
-    <!-- Vodafone Logo (Speech Mark Circle) -->
-    <circle cx="210" cy="75" r="22" fill="#E60000"/>
-    <path d="M 210 65 Q 215 70, 210 75 Q 205 70, 210 65" fill="white"/>
-    
     <!-- Vodafone Text -->
-    <text x="245" y="85" font-family="Arial, sans-serif" font-size="38" font-weight="bold" fill="#E60000" text-anchor="start">vodafone</text>
+    <text x="250" y="90" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#E60000" text-anchor="middle">vodafone</text>
     
     <!-- Phone Number -->
     <text x="250" y="200" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="black" text-anchor="middle" letter-spacing="2">${displayNumber}</text>
@@ -256,14 +252,9 @@ export default function PlateGenerator() {
                           ooredoo
                         </span>
                       ) : (
-                        <div className="flex items-center gap-1">
-                          <div className="w-[22px] h-[22px] rounded-full flex items-center justify-center" style={{ backgroundColor: "#E60000" }}>
-                            <div className="w-[8px] h-[8px] bg-white rounded-full"></div>
-                          </div>
-                          <span className="text-[19px] font-bold tracking-tight" style={{ color: "#E60000" }}>
-                            vodafone
-                          </span>
-                        </div>
+                        <span className="text-[24px] font-bold tracking-tight" style={{ color: "#E60000" }}>
+                          vodafone
+                        </span>
                       )}
                     </div>
                     
